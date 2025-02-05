@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mybatis.UserMapper">
+
+    <resultMap id="userMap" type="com.example.mybatis.dto.UserDTO">
+        <id column="uid" property="uid"></id>
+        <result column="id" property="id"></result>
+        <result column="password" property="password"></result>
+        <result column="nickname" property="nickname"></result>
+        <result column="auth" property="auth"></result>
+        <result column="signup_date" property="signupDate"></result>
+        <result column="account_status" property="account_status"></result>
+    </resultMap>
+
+    <select id="findUser">
+        SELECT *
+        FROM user_tb
+        WHERE id=#{id};
+    </select>
+    <insert id="saveUser">
+        INSERT INTO user_tb(id,password,nickname)
+        VALUES(#{id},#{password},#{nickname});
+    </insert>
+</mapper>
