@@ -3,7 +3,9 @@ package com.example.mybatis.controller;
 
 import com.example.mybatis.dto.UserDTO;
 import com.example.mybatis.mybatis.UserMapper;
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -31,19 +33,27 @@ public class UserController {
                                    HttpServletRequest request){
         UserDTO user = userMapper.findUser(userDTO.getId());
 
-        if(user == null){
+        if(user == null || !userDTO.getPassword().equals(user.getPassword())){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-
-        if(user != null && userDTO.getPassword().equals(user.getPassword())){
-            if(user != null && userDTO.getPassword().equals(user.getPassword())){
-                HttpSession session = request.getSession();
+        HttpSession session = request.getSession();
                 session.setAttribute("userUid",user.getUid());
-                session.setAttribute("auth",user.getAuth());}
+                session.setAttribute("auth",user.getAuth());
 
             return new ResponseEntity<>(HttpStatus.OK);
-        }else {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response){
+        HttpSession session = request.getSession(false);
+        if(session != null){
+            session.invalidate();
+
+            Cookie cookie = new Cookie("JSESSIONID", null);
+            cookie.setPath("/");
+            cookie.setMaxAge(0);
+            response.addCookie(cookie);
+        }
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 }

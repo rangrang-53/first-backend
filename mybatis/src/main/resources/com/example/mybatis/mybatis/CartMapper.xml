@@ -4,23 +4,14 @@
         "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.mybatis.mybatis.CartMapper">
 
-    <resultMap id="userMap" type="com.example.mybatis.dto.CartDTO">
+    <resultMap id="cartMap" type="com.example.mybatis.dto.CartDTO">
         <id column="uid" property="uid"></id>
-        <result column="id" property="id"></result>
-        <result column="password" property="password"></result>
-        <result column="nickname" property="nickname"></result>
-        <result column="auth" property="auth"></result>
-        <result column="signup_date" property="signupDate"></result>
-        <result column="account_status" property="account_status"></result>
+        <result column="user_uid" property="userDTO.uid"></result>
+        <result column="quantity" property="quantity"></result>
+        <result column="product_uid" property="productDTO.uid"></result>
     </resultMap>
-
-    <select id="findUser">
-        SELECT *
-        FROM user_tb
-        WHERE id=#{id};
-    </select>
-    <insert id="saveUser">
-        INSERT INTO user_tb(id,password,nickname)
-        VALUES(#{id},#{password},#{nickname});
+    <insert id="addToCart">
+        INSERT INTO cart_tb(product_uid,quantity,user_uid)
+        VALUES(#{productDTO.uid},#{quantity},#{userDTO.uid});
     </insert>
 </mapper>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mybatis.ReviewMapper">
+
+    <resultMap id="reviewMap" type="com.example.mybatis.dto.ReviewDTO">
+        <id column="uid" property="uid"></id>
+        <result column="title" property="title"></result>
+        <result column="content" property="content"></result>
+        <result column="write_date" property="writeDate"></result>
+        <result column="modify_date" property="modifyDate"></result>
+        <result column="view_count" property="viewCount"></result>
+        <result column="deleteyn" property="deleteyn"></result>
+        <result column="rating" property="rating"></result>
+        <result column="image" property="image"></result>
+
+        <result column="user_uid" property="userDTO.uid"></result>
+        <result column="product_uid" property="productDTO.uid"></result>
+    </resultMap>
+    <select id="getReviewsByProduct" resultMap="reviewMap">
+        SELECT * FROM review_tb
+        WHERE product_uid = #{productDTO.uid} AND deleteyn = 'n'
+    </select>
+
+    <insert id="saveReview">
+        INSERT INTO review_tb(title,content,rating,user_uid,product_uid)
+        VALUES(#{title},#{content},#{rating},#{userDTO.uid},#{productDTO.uid});
+    </insert>
+</mapper>
