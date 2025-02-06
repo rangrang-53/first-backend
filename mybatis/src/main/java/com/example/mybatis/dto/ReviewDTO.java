@@ -8,7 +8,7 @@ public class ReviewDTO {
     private String content;
     private LocalDateTime writeDate;
     private LocalDateTime modifyDate;
-    private int view_count;
+    private int viewCount;
     private String deleteyn;
     private int rating;
     private int image;
@@ -55,12 +55,12 @@ public class ReviewDTO {
         this.modifyDate = modifyDate;
     }
 
-    public int getView_count() {
-        return view_count;
+    public int getViewCount() {
+        return viewCount;
     }
 
-    public void setView_count(int view_count) {
-        this.view_count = view_count;
+    public void setViewCount(int viewCount) {
+        this.viewCount = viewCount;
     }
 
     public String getDeleteyn() {

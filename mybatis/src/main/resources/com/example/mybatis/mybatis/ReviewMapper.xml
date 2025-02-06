@@ -15,16 +15,35 @@
         <result column="rating" property="rating"></result>
         <result column="image" property="image"></result>
 
-        <result column="user_uid" property="userDTO.uid"></result>
-        <result column="product_uid" property="productDTO.uid"></result>
+        <association property="userDTO" javaType="com.example.mybatis.dto.UserDTO">
+            <id column="user_uid" property="uid"></id>
+            <result column="nickname" property="nickname"></result>
+        </association>
+
+        <association property="productDTO" javaType="com.example.mybatis.dto.ProductDTO">
+            <id column="product_uid" property="uid"></id>
+            <result column="name" property="name"></result>
+        </association>
+
     </resultMap>
     <select id="getReviewsByProduct" resultMap="reviewMap">
-        SELECT * FROM review_tb
-        WHERE product_uid = #{productDTO.uid} AND deleteyn = 'n'
+        SELECT review_tb.uid, review_tb.title, review_tb.content, review_tb.rating, review_tb.write_date, review_tb.view_count, review_tb.image, user_tb.nickname, product_tb.name
+        FROM review_tb
+        JOIN user_tb ON review_tb.user_uid = user_tb.uid
+        JOIN product_tb ON review_tb.product_uid = product_tb.uid
+        WHERE review_tb.product_uid = #{productUid}
+        AND review_tb.uid =#{uid}
+        AND deleteyn = 'n';
     </select>
 
     <insert id="saveReview">
-        INSERT INTO review_tb(title,content,rating,user_uid,product_uid)
-        VALUES(#{title},#{content},#{rating},#{userDTO.uid},#{productDTO.uid});
+        INSERT INTO review_tb(title,content,rating,image, user_uid,product_uid)
+        VALUES(#{title},#{content},#{rating},#{image},#{userDTO.uid},#{productDTO.uid});
     </insert>
+
+    <update id="updateReview">
+        UPDATE review_tb
+        SET title=#{title}, content=#{content}, rating=#{rating}, image=#{image}
+        WHERE uid =#{uid};
+    </update>
 </mapper>

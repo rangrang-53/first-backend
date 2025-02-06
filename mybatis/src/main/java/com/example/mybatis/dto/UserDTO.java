@@ -3,6 +3,8 @@ package com.example.mybatis.dto;
 import java.time.LocalDateTime;
 
 public class UserDTO {
+
+
     private int uid;
 
     private String id;
