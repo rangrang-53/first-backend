@@ -30,10 +30,16 @@ public class UserController {
 
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody UserDTO userDTO,
-                                   HttpServletRequest request){
+                                   HttpServletRequest request,
+                                   HttpServletResponse response){
         UserDTO user = userMapper.findUser(userDTO.getId());
 
         if(user == null || !userDTO.getPassword().equals(user.getPassword())){
+            Cookie cookie = new Cookie("JSESSIONID", null);
+            cookie.setPath("/");
+            cookie.setMaxAge(0);
+            response.addCookie(cookie);
+
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         HttpSession session = request.getSession();

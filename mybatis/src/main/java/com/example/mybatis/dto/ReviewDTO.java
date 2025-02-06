@@ -11,7 +11,7 @@ public class ReviewDTO {
     private int viewCount;
     private String deleteyn;
     private int rating;
-    private int image;
+    private String image;
     private UserDTO userDTO;
     private ProductDTO productDTO;
 
@@ -79,11 +79,11 @@ public class ReviewDTO {
         this.rating = rating;
     }
 
-    public int getImage() {
+    public String getImage() {
         return image;
     }
 
-    public void setImage(int image) {
+    public void setImage(String image) {
         this.image = image;
     }
 

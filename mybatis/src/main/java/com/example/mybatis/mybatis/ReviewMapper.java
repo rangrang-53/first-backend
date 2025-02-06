@@ -11,4 +11,5 @@ public interface ReviewMapper {
     void saveReview(ReviewDTO reviewDTO);
     List<ReviewDTO> getReviewsByProduct(@Param("productUid") int productUid, @Param("uid") int uid);
     void updateReview(ReviewDTO reviewDTO);
+    void deleteReview(int uid);
 }

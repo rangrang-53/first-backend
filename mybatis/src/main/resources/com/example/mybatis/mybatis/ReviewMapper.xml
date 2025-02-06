@@ -27,7 +27,7 @@
 
     </resultMap>
     <select id="getReviewsByProduct" resultMap="reviewMap">
-        SELECT review_tb.uid, review_tb.title, review_tb.content, review_tb.rating, review_tb.write_date, review_tb.view_count, review_tb.image, user_tb.nickname, product_tb.name
+        SELECT review_tb.uid, review_tb.title, review_tb.content, review_tb.rating, review_tb.write_date, review_tb.view_count, review_tb.image, user_tb.nickname, user_uid, product_uid, product_tb.name
         FROM review_tb
         JOIN user_tb ON review_tb.user_uid = user_tb.uid
         JOIN product_tb ON review_tb.product_uid = product_tb.uid
@@ -43,7 +43,32 @@
 
     <update id="updateReview">
         UPDATE review_tb
-        SET title=#{title}, content=#{content}, rating=#{rating}, image=#{image}
-        WHERE uid =#{uid};
+        SET
+        title = #{title},
+        content = #{content},
+        rating = <choose>
+        <when test="rating != null">
+            #{rating}
+        </when>
+        <otherwise>
+            rating
+        </otherwise>
+    </choose>,
+        image = <choose>
+        <when test="image != null">
+            #{image}
+        </when>
+        <otherwise>
+            image
+        </otherwise>
+    </choose>
+        WHERE uid = #{uid};
     </update>
+
+    <update id="deleteReview">
+        UPDATE review_tb
+        SET deleteyn = 'y'
+        WHERE uid = #{uid}
+    </update>
+
 </mapper>
