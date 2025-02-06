@@ -43,8 +43,7 @@ public class ProductController {
         productDTO.setUid(userUid);
 
 
-
-        return new ResponseEntity<>("상품 등록 성공",HttpStatus.OK)
+        return new ResponseEntity<>("상품 등록 성공",HttpStatus.OK);
     }
 
 }
