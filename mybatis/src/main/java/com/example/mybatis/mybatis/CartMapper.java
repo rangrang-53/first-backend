@@ -10,7 +10,7 @@ import java.util.List;
 @Mapper
 public interface CartMapper {
     void addToCart(CartDTO cartDTO);
-    void removeFromCart(CartDTO cartDTO);
     List<CartDTO> getCartProducts(CartDTO cartDTO);
+    void removeFromCart(CartDTO cartDTO);
     void checkout(CartDTO cartDTO);
 }

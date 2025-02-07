@@ -10,10 +10,9 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 public class CartController {
@@ -26,7 +25,7 @@ public class CartController {
     }
 
     @PostMapping("/cart")
-    public ResponseEntity<?> add(@RequestBody CartDTO cartDTO,
+    public ResponseEntity<?> addCart(@RequestBody CartDTO cartDTO,
                                  HttpServletRequest request) {
         HttpSession session = request.getSession(false);
         if (session != null && session.getAttribute("userUid") != null) {
@@ -42,5 +41,10 @@ public class CartController {
         cartMapper.addToCart(cartDTO);
         return new ResponseEntity<>(HttpStatus.OK);
 
+    }
+
+    @GetMapping("/cart/{uid}")
+    public ResponseEntity<List<CartDTO>> viewCart (@PathVariable("uid") int uid){
+        List<CartDTO> cartList = cartMapper.getCartProducts(uid);
     }
 }
