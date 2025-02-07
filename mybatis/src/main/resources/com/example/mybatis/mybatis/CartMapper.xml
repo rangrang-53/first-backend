@@ -10,6 +10,15 @@
         <result column="quantity" property="quantity"></result>
         <result column="product_uid" property="productDTO.uid"></result>
     </resultMap>
+
+    <select id="getCartProducts" resultMap="cartMap">
+        SELECT cart_tb.uid, cart_tb.quantity, user_uid, product_uid, product_tb.name
+        FROM cart_tb
+        JOIN user_tb ON cart_tb.user_uid = user_tb.uid
+        JOIN product_tb ON cart_tb.product_uid = product_tb.uid
+        WHERE cart_tb.user_uid = #{userUid}
+        AND cart_tb.uid =#{uid}
+    </select>
     <insert id="addToCart">
         INSERT INTO cart_tb(product_uid,quantity,user_uid)
         VALUES(#{productDTO.uid},#{quantity},#{userDTO.uid});

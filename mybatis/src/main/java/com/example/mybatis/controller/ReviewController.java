@@ -23,7 +23,7 @@ public class ReviewController {
         this.reviewMapper = reviewMapper;
     }
 
-    @PostMapping("/product/{productUid}")
+    @PostMapping("/review/{productUid}")
     public ResponseEntity<?> writeReview(@RequestBody ReviewDTO reviewDTO,
                                          HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -61,7 +61,7 @@ public class ReviewController {
 
     }
 
-    @GetMapping("/product/{productUid}/{uid}")
+    @GetMapping("/review/{productUid}/{uid}")
     public ResponseEntity<List<ReviewDTO>> getReviewsByProduct(@PathVariable("productUid") int productUid, @PathVariable("uid") int uid) {
         List<ReviewDTO> review = reviewMapper.getReviewsByProduct(productUid,uid);
         if(review == null || review.isEmpty()) {
@@ -70,7 +70,7 @@ public class ReviewController {
         return new ResponseEntity<>(review, HttpStatus.OK);
     }
 
-    @PatchMapping("/product/{productUid}/{uid}")
+    @PatchMapping("/review/{productUid}/{uid}")
     public ResponseEntity<?> editReview(@PathVariable("productUid") int productUid,
                                           @PathVariable("uid") int uid,@RequestBody ReviewDTO reviewDTO, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
@@ -140,7 +140,7 @@ public class ReviewController {
         return new ResponseEntity<>(HttpStatus.OK); // 수정 성공 시 200 반환
     }
 
-    @DeleteMapping("/product/{productUid}/{uid}")
+    @DeleteMapping("/review/{productUid}/{uid}")
     public ResponseEntity<?> removeReview(@PathVariable("productUid") int productUid,
                                           @PathVariable("uid") int uid,
                                           HttpServletRequest request){

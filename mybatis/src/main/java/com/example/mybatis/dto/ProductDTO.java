@@ -1,5 +1,7 @@
 package com.example.mybatis.dto;
 
+import java.util.List;
+
 public class ProductDTO {
     private int uid;
     private String name;
@@ -9,6 +11,7 @@ public class ProductDTO {
     private int stockQuantity;
     private String description;
     private CategoryDTO categoryDTO;
+    private List<ProductImageDTO> images;
 
     public int getUid() {
         return uid;
@@ -72,5 +75,13 @@ public class ProductDTO {
 
     public void setCategoryDTO(CategoryDTO categoryDTO) {
         this.categoryDTO = categoryDTO;
+    }
+
+    public List<ProductImageDTO> getImages() {
+        return images;
+    }
+
+    public void setImages(List<ProductImageDTO> images) {
+        this.images = images;
     }
 }

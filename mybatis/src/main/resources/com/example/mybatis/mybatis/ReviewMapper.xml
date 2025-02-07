@@ -37,7 +37,7 @@
     </select>
 
     <insert id="saveReview">
-        INSERT INTO review_tb(title,content,rating,image, user_uid,product_uid)
+        INSERT INTO review_tb(title,content,rating,image,user_uid,product_uid)
         VALUES(#{title},#{content},#{rating},#{image},#{userDTO.uid},#{productDTO.uid});
     </insert>
 

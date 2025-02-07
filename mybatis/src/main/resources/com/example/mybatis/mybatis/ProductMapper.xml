@@ -18,9 +18,34 @@
             <result column="name" property="name"></result>
         </association>
     </resultMap>
-    <insert id="saveProduct">
-        INSERT INTO product_tb(name,brand_name,price,size,stock_quantity,description, category_uid)
-        VALUES(#{name},#{brand_name},#{price},#{size},#{stock_quantity},#{description}, #{categoryDTO.uid});
+    <insert id="saveProduct" useGeneratedKeys="true" keyProperty="uid">
+        INSERT INTO product_tb(name, brand_name, price, size, stock_quantity, category_uid
+        <if test="description != null and description != ''">
+            , description
+        </if>
+
+        )
+        VALUES (#{name}, #{brandName}, #{price}, #{size}, #{stockQuantity}, #{categoryDTO.uid}
+        <if test="description != null and description != ''">
+            , #{description}
+        </if>
+        );
     </insert>
+
+    <insert id="saveProductImages">
+        <if test="images != null and images.size() > 0">
+            INSERT INTO product_image_tb(url, product_uid)
+            VALUES
+            <foreach collection="images" item="image" separator=",">
+                (#{image.url}, #{image.productDTO.uid})
+            </foreach>
+        </if>
+    </insert>
+
+    <insert id="saveCategory" useGeneratedKeys="true" keyProperty="uid">
+        INSERT INTO category_tb(name) VALUES (#{name});
+    </insert>
+
+
 
 </mapper>

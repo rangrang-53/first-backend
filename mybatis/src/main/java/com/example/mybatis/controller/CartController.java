@@ -10,6 +10,7 @@ import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,35 +27,20 @@ public class CartController {
 
     @PostMapping("/cart")
     public ResponseEntity<?> add(@RequestBody CartDTO cartDTO,
-                                 HttpServletRequest request){
+                                 HttpServletRequest request) {
         HttpSession session = request.getSession(false);
-        if (session != null && session.getAttribute("userUid") != null){
-
+        if (session != null && session.getAttribute("userUid") != null) {
+            // 로그인한 경우
             int userUid = (int) session.getAttribute("userUid");
             UserDTO userDTO = new UserDTO();
             userDTO.setUid(userUid);
-
-
             cartDTO.setUserDTO(userDTO);
-
-            cartMapper.addToCart(cartDTO);
-            return new ResponseEntity<>(HttpStatus.OK);
         } else {
-            UserDTO userDTO = new UserDTO();
-            userDTO.setUid(-1);
-            cartDTO.setUserDTO(userDTO);
-            cartMapper.addToCart(cartDTO);
-            return new ResponseEntity<>(HttpStatus.OK);
+            // 로그인하지 않은 경우
+            cartDTO.setUserDTO(null);  // user_uid를 NULL로 설정
         }
-    }
+        cartMapper.addToCart(cartDTO);
+        return new ResponseEntity<>(HttpStatus.OK);
 
-    @PostMapping("/checkout")
-    public ResponseEntity<?> checkout(HttpServletRequest request){
-        HttpSession session = request.getSession(false);
-        if(session == null || session.getAttribute("userUid") == null){
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        } else {
-            return new ResponseEntity<>(HttpStatus.OK);
-        }
     }
 }

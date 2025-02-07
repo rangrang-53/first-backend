@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mybatis.QnaMapper">
+
+    <resultMap id="qnaMap" type="com.example.mybatis.dto.QnaDTO">
+        <id column="uid" property="uid"></id>
+        <result column="title" property="title"></result>
+        <result column="content" property="content"></result>
+        <result column="category" property="category"></result>
+        <result column="write_date" property="writeDate"></result>
+        <result column="modify_date" property="modifyDate"></result>
+        <result column="password" property="password"></result>
+        <result column="deleteyn" property="deleteyn"></result>
+        <result column="answeryn" property="answeryn"></result>
+        <result column="answer_content" property="answerContent"></result>
+        <result column="answer_date" property="answer_date"></result>
+
+        <association property="userDTO" javaType="com.example.mybatis.dto.UserDTO">
+            <id column="user_uid" property="uid"></id>
+            <result column="nickname" property="nickname"></result>
+        </association>
+
+        <association property="productDTO" javaType="com.example.mybatis.dto.ProductDTO">
+            <id column="product_uid" property="uid"></id>
+            <result column="name" property="name"></result>
+        </association>
+    </resultMap>
+
+    <select id="getqnaByProduct" resultMap="qnaMap">
+        SELECT qna_tb.uid, qna_tb.title, qna_tb.content, qna_tb.password, qna_tb.write_date, qna_tb.category, user_tb.nickname, user_uid, product_uid, product_tb.name
+        FROM qna_tb
+        JOIN user_tb ON qna_tb.user_uid = user_tb.uid
+        JOIN product_tb ON qna_tb.product_uid = product_tb.uid
+        WHERE qna_tb.product_uid = #{productUid}
+        AND qna_tb.uid =#{uid}
+        AND deleteyn = 'n';
+    </select>
+
+    <insert id="saveQna">
+        INSERT INTO qna_tb(title, content, category, password, user_uid, product_uid)
+        VALUES (#{title},#{content},#{category},#{password},#{userDTO.uid},#{productDTO.uid});
+    </insert>
+
+</mapper>

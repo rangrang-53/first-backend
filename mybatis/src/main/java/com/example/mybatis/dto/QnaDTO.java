@@ -7,8 +7,10 @@ public class QnaDTO {
     private String title;
     private String content;
     private String category;
-    private int password;
+    private Integer password;
     private LocalDateTime writeDate;
+    private LocalDateTime modifyDate;
+    private String deleteyn;
     private String answeryn;
     private String answerContent;
     private LocalDateTime answerDate;
@@ -63,11 +65,11 @@ public class QnaDTO {
         this.category = category;
     }
 
-    public int getPassword() {
+    public Integer getPassword() {
         return password;
     }
 
-    public void setPassword(int password) {
+    public void setPassword(Integer password) {
         this.password = password;
     }
 
@@ -77,6 +79,22 @@ public class QnaDTO {
 
     public void setWriteDate(LocalDateTime writeDate) {
         this.writeDate = writeDate;
+    }
+
+    public LocalDateTime getModifyDate() {
+        return modifyDate;
+    }
+
+    public void setModifyDate(LocalDateTime modifyDate) {
+        this.modifyDate = modifyDate;
+    }
+
+    public String getDeleteyn() {
+        return deleteyn;
+    }
+
+    public void setDeleteyn(String deleteyn) {
+        this.deleteyn = deleteyn;
     }
 
     public String getAnsweryn() {
