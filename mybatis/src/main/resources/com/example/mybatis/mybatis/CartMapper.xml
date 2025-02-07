@@ -6,21 +6,80 @@
 
     <resultMap id="cartMap" type="com.example.mybatis.dto.CartDTO">
         <id column="uid" property="uid"></id>
-        <result column="user_uid" property="userDTO.uid"></result>
         <result column="quantity" property="quantity"></result>
-        <result column="product_uid" property="productDTO.uid"></result>
+        <result column="session_id" property="sessionId"></result>
+
+        <association property="userDTO" javaType="com.example.mybatis.dto.UserDTO">
+            <id column="user_uid" property="uid"></id>
+        </association>
+
+        <association property="productDTO" javaType="com.example.mybatis.dto.ProductDTO">
+            <id column="product_uid" property="uid"></id>
+            <result column="name" property="name"></result>
+            <result column="brand_name" property="brandName"></result>
+            <result column="price" property="price"></result>
+            <result column="size" property="size"></result>
+
+            <collection property="images" ofType="com.example.mybatis.dto.ProductImageDTO">
+                <id column="image_uid" property="uid"/>
+                <result column="image_url" property="url"/>
+
+            </collection>
+        </association>
     </resultMap>
 
-    <select id="getCartProducts" resultMap="cartMap">
-        SELECT cart_tb.uid, cart_tb.quantity, user_uid, product_uid, product_tb.name
+    <delete id="removeFromCart" parameterType="com.example.mybatis.dto.CartDTO">
+        DELETE FROM cart_tb
+        WHERE uid = #{uid}
+            OR (product_uid = #{productDTO.uid}
+        AND (user_uid = #{userDTO.uid} OR session_id = #{sessionId} OR session_id IS NULL))
+    </delete>
+
+    <select id="getCartProductsBySession" resultMap="cartMap">
+        SELECT cart_tb.uid,
+        cart_tb.quantity,
+        cart_tb.session_id,
+        cart_tb.user_uid,
+        cart_tb.product_uid AS cart_product_uid,
+        product_tb.uid AS product_uid,
+        product_tb.name,
+        product_tb.brand_name,
+        product_tb.price,
+        product_tb.size,
+        product_image_tb.uid AS image_uid,
+        product_image_tb.url AS image_url
         FROM cart_tb
-        JOIN user_tb ON cart_tb.user_uid = user_tb.uid
         JOIN product_tb ON cart_tb.product_uid = product_tb.uid
-        WHERE cart_tb.user_uid = #{userUid}
-        AND cart_tb.uid =#{uid}
+        LEFT JOIN product_image_tb ON product_tb.uid = product_image_tb.product_uid
+        WHERE cart_tb.session_id = #{sessionId}
     </select>
+
+
+
+    <select id="getCartProducts" resultMap="cartMap">
+        SELECT cart_tb.uid,
+        cart_tb.quantity,
+        cart_tb.session_id,
+        cart_tb.user_uid,
+        cart_tb.product_uid AS cart_product_uid,  <!-- ✅ 별칭 추가 -->
+        product_tb.uid AS product_uid,  <!-- ✅ 별칭 추가 -->
+        product_tb.name,
+        product_tb.brand_name,
+        product_tb.price,
+        product_tb.size,
+        product_image_tb.uid AS image_uid,
+        product_image_tb.url AS image_url
+        FROM cart_tb
+        JOIN product_tb ON cart_tb.product_uid = product_tb.uid
+        LEFT JOIN product_image_tb ON product_tb.uid = product_image_tb.product_uid
+        WHERE
+        (cart_tb.user_uid = #{userUid} OR
+        (cart_tb.user_uid IS NULL AND cart_tb.session_id = #{sessionId}))
+    </select>
+
     <insert id="addToCart">
-        INSERT INTO cart_tb(product_uid,quantity,user_uid)
-        VALUES(#{productDTO.uid},#{quantity},#{userDTO.uid});
+        INSERT INTO cart_tb (quantity, product_uid, user_uid, session_id)
+        VALUES (#{quantity}, #{productDTO.uid}, #{userDTO.uid}, #{sessionId})
     </insert>
+
 </mapper>

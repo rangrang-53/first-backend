@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mybatis.OrderMapper">
+
+    <resultMap id="orderResultMap" type="com.example.mybatis.dto.OrderDTO">
+        <id column="uid" property="uid"/>
+        <result column="order_date" property="orderDate"/>
+        <result column="total_amount" property="totalAmount"/>
+        <result column="order_status" property="orderStatus"/>
+
+        <association property="userDTO" javaType="com.example.mybatis.dto.UserDTO">
+            <id column="user_uid" property="uid"/>
+        </association>
+
+        <collection property="orderDetails" ofType="com.example.mybatis.dto.OrderDetailDTO">
+            <result property="uid" column="detail_uid"/>
+            <result property="orderUid" column="order_uid"/>
+            <result property="productUid" column="product_uid"/>
+            <result property="quantity" column="quantity"/>
+            <result property="price" column="price"/>
+        </collection>
+    </resultMap>
+
+    <insert id="createOrder" parameterType="com.example.mybatis.dto.OrderDTO">
+        INSERT INTO order_tb (order_date, order_status, total_amount, user_uid)
+        VALUES (#{orderDate}, #{orderStatus}, #{totalAmount}, #{userDTO.uid})
+    </insert>
+
+    <insert id="createOrderDetail" parameterType="com.example.mybatis.dto.OrderDetailDTO">
+        INSERT INTO order_detail_tb (quantity, price, order_uid, product_uid)
+        VALUES (#{quantity}, #{price}, #{orderDTO.uid}, #{productDTO.uid})
+    </insert>
+
+    <select id="getOrderByUserUid" resultMap="orderResultMap">
+        SELECT * FROM order_tb
+        WHERE user_uid = #{userUid}
+    </select>
+
+</mapper>

@@ -3,7 +3,7 @@ package com.example.mybatis.dto;
 public class OrderDetailDTO {
     private int uid;
     private int quantity;
-    private int totalPrice;
+    private int price;
     private ProductDTO productDTO;
     private OrderDTO orderDTO;
 
@@ -23,14 +23,6 @@ public class OrderDetailDTO {
         this.quantity = quantity;
     }
 
-    public int getTotalPrice() {
-        return totalPrice;
-    }
-
-    public void setTotalPrice(int totalPrice) {
-        this.totalPrice = totalPrice;
-    }
-
     public ProductDTO getProductDTO() {
         return productDTO;
     }
@@ -45,5 +37,13 @@ public class OrderDetailDTO {
 
     public void setOrderDTO(OrderDTO orderDTO) {
         this.orderDTO = orderDTO;
+    }
+
+    public int getPrice() {
+        return price;
+    }
+
+    public void setPrice(int price) {
+        this.price = price;
     }
 }

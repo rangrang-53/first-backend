@@ -5,6 +5,7 @@ public class CartDTO {
     private int quantity;
     private ProductDTO productDTO;
     private UserDTO userDTO;
+    private String sessionId;
 
     public int getUid() {
         return uid;
@@ -36,5 +37,13 @@ public class CartDTO {
 
     public void setUserDTO(UserDTO userDTO) {
         this.userDTO = userDTO;
+    }
+
+    public String getSessionId() {
+        return sessionId;
+    }
+
+    public void setSessionId(String sessionId) {
+        this.sessionId = sessionId;
     }
 }

@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mybatis.mybatis.PaymentMapper">
+    
+    <insert id="savePayment" parameterType="com.example.mybatis.dto.PaymentDTO">
+        INSERT INTO payment_tb (paid_date, payment_amount, payment_method, payment_status, order_uid)
+        VALUES (#{paidDate}, #{paymentAmount}, #{paymentMethod}, #{paymentStatus}, #{orderDTO.uid})
+    </insert>
+
+    <select id="getPaymentByOrderUid" resultMap="com.example.mybatis.dto.PaymentDTO">
+        SELECT * FROM payment_tb
+        WHERE order_uid = #{orderUid}
+    </select>
+
+    <update id="updatePaymentStatus" parameterType="com.example.mybatis.dto.PaymentDTO">
+        UPDATE payment_tb
+        SET payment_status = #{paymentStatus}
+        WHERE uid = #{uid}
+    </update>
+</mapper>

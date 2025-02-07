@@ -73,11 +73,6 @@ public class ProductController {
         // ✅ 이미지 등록 (상품 UID 필요하므로 상품 저장 후 진행)
         List<ProductImageDTO> images = productDTO.getImages();
         if (images != null && !images.isEmpty()) {
-            for (ProductImageDTO image : images) {
-                if (image.getProductDTO() == null) {
-                    image.setProductDTO(productDTO);
-                }
-            }
 
             System.out.println("Product DTO: " + productDTO);
             System.out.println("Product UID: " + productDTO.getUid());

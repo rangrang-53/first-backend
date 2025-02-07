@@ -3,7 +3,6 @@ package com.example.mybatis.dto;
 public class ProductImageDTO {
     private int uid;
     private String url;
-    private ProductDTO productDTO;
 
     public int getUid() {
         return uid;
@@ -21,11 +20,4 @@ public class ProductImageDTO {
         this.url = url;
     }
 
-    public ProductDTO getProductDTO() {
-        return productDTO;
-    }
-
-    public void setProductDTO(ProductDTO productDTO) {
-        this.productDTO = productDTO;
-    }
 }
