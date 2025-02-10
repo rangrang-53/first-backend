@@ -32,9 +32,17 @@
         JOIN user_tb ON review_tb.user_uid = user_tb.uid
         JOIN product_tb ON review_tb.product_uid = product_tb.uid
         WHERE review_tb.product_uid = #{productUid}
-        AND review_tb.uid =#{uid}
+        AND deleteyn = 'n'
+        LIMIT #{offset}, #{pageSize};
+    </select>
+
+    <select id="getReviewCountByProduct" resultType="int">
+        SELECT COUNT(*)
+        FROM review_tb
+        WHERE product_uid = #{productUid}
         AND deleteyn = 'n';
     </select>
+
 
     <insert id="saveReview">
         INSERT INTO review_tb(title,content,rating,image,user_uid,product_uid)

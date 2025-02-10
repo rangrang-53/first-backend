@@ -9,10 +9,15 @@
         <result column="order_date" property="orderDate"/>
         <result column="total_amount" property="totalAmount"/>
         <result column="order_status" property="orderStatus"/>
+        <result property="orderUid" column="order_uid"/>
 
         <association property="userDTO" javaType="com.example.mybatis.dto.UserDTO">
             <id column="user_uid" property="uid"/>
         </association>
+        <association property="orderDTO" javaType="com.example.mybatis.dto.OrderDTO">
+            <id column="order_uid" property="uid"/>
+        </association>
+
 
         <collection property="orderDetails" ofType="com.example.mybatis.dto.OrderDetailDTO">
             <result property="uid" column="detail_uid"/>
@@ -23,7 +28,7 @@
         </collection>
     </resultMap>
 
-    <insert id="createOrder" parameterType="com.example.mybatis.dto.OrderDTO">
+    <insert id="createOrder" parameterType="com.example.mybatis.dto.OrderDTO" useGeneratedKeys="true" keyProperty="uid">
         INSERT INTO order_tb (order_date, order_status, total_amount, user_uid)
         VALUES (#{orderDate}, #{orderStatus}, #{totalAmount}, #{userDTO.uid})
     </insert>
@@ -37,5 +42,10 @@
         SELECT * FROM order_tb
         WHERE user_uid = #{userUid}
     </select>
+
+    <select id="getOrderByUid" parameterType="int" resultType="com.example.mybatis.dto.OrderDTO">
+        SELECT * FROM orders WHERE uid = #{orderUid}
+    </select>
+
 
 </mapper>

@@ -9,7 +9,10 @@ import java.util.List;
 @Mapper
 public interface ReviewMapper {
     void saveReview(ReviewDTO reviewDTO);
-    List<ReviewDTO> getReviewsByProduct(@Param("productUid") int productUid, @Param("uid") int uid);
+    List<ReviewDTO> getReviewsByProduct(@Param("productUid") int productUid,
+                                        @Param("offset") int offset,
+                                        @Param("pageSize") int pageSize);
+    int getReviewCountByProduct(@Param("productUid") int productUid);
     void updateReview(ReviewDTO reviewDTO);
     void deleteReview(int uid);
 }

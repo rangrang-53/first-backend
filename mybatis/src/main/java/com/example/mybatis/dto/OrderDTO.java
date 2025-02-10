@@ -58,4 +58,5 @@ public class OrderDTO {
     public void setOrderDetails(List<OrderDetailDTO> orderDetails) {
         this.orderDetails = orderDetails;
     }
+
 }

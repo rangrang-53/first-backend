@@ -11,9 +11,12 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
+@RequestMapping
 public class ReviewController {
     private ReviewMapper reviewMapper;
 
@@ -57,22 +60,38 @@ public class ReviewController {
 
         reviewMapper.saveReview(reviewDTO);
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        return new ResponseEntity<>(reviewDTO, HttpStatus.OK);
 
     }
 
-    @GetMapping("/review/{productUid}/{uid}")
-    public ResponseEntity<List<ReviewDTO>> getReviewsByProduct(@PathVariable("productUid") int productUid, @PathVariable("uid") int uid) {
-        List<ReviewDTO> review = reviewMapper.getReviewsByProduct(productUid,uid);
-        if(review == null || review.isEmpty()) {
+    @GetMapping("/review/{productUid}")
+    public ResponseEntity<Map<String, Object>> getReviewsByProduct(
+            @PathVariable("productUid") int productUid,
+            @RequestParam(value = "page", defaultValue = "1") int page,
+            @RequestParam(value = "size", defaultValue = "10") int size) {
+
+        int offset = (page - 1) * size;  // offset 계산
+        List<ReviewDTO> reviews = reviewMapper.getReviewsByProduct(productUid, offset, size);
+        if (reviews == null || reviews.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
-        return new ResponseEntity<>(review, HttpStatus.OK);
+
+        // 전체 리뷰 수 조회
+        int totalReviews = reviewMapper.getReviewCountByProduct(productUid);
+
+        // 페이징 정보 추가하여 응답
+        Map<String, Object> response = new HashMap<>();
+        response.put("reviews", reviews);
+        response.put("total", totalReviews);
+        response.put("currentPage", page);
+        response.put("totalPages", (int) Math.ceil((double) totalReviews / size));
+
+        return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PatchMapping("/review/{productUid}/{uid}")
+    @PatchMapping("/review/{productUid}")
     public ResponseEntity<?> editReview(@PathVariable("productUid") int productUid,
-                                          @PathVariable("uid") int uid,@RequestBody ReviewDTO reviewDTO, HttpServletRequest request) {
+                                          @RequestBody ReviewDTO reviewDTO, HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 
         // 세션 확인
@@ -89,7 +108,11 @@ public class ReviewController {
 
         System.out.println("✅ 로그인한 사용자 userUid: " + userUid);
 
-        List<ReviewDTO> existingReviews = reviewMapper.getReviewsByProduct(productUid, uid);
+        int page = 1;  // 기본값
+        int size = 10;  // 기본값
+        int offset = (page - 1) * size;
+
+        List<ReviewDTO> existingReviews = reviewMapper.getReviewsByProduct(productUid, offset, size);
         if (existingReviews == null || existingReviews.isEmpty()) {
             System.out.println("해당 리뷰가 존재하지 않음 (productUid: \" + reviewDTO.getProductDTO().getUid() + \", reviewUid: \" + reviewDTO.getUid() + \")");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 리뷰가 없으면 404
@@ -140,9 +163,8 @@ public class ReviewController {
         return new ResponseEntity<>(HttpStatus.OK); // 수정 성공 시 200 반환
     }
 
-    @DeleteMapping("/review/{productUid}/{uid}")
+    @DeleteMapping("/review/{productUid}")
     public ResponseEntity<?> removeReview(@PathVariable("productUid") int productUid,
-                                          @PathVariable("uid") int uid,
                                           HttpServletRequest request){
         HttpSession session = request.getSession(false);
 
@@ -155,8 +177,13 @@ public class ReviewController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
+        // 페이징을 위한 기본값 설정
+        int page = 1;  // 기본값
+        int size = 10;  // 기본값
+        int offset = (page - 1) * size;
+
         // 해당 리뷰를 가져옴 (productUid와 uid를 함께 사용하여 리뷰를 확인)
-        List<ReviewDTO> existingReviews = reviewMapper.getReviewsByProduct(productUid, uid);
+        List<ReviewDTO> existingReviews = reviewMapper.getReviewsByProduct(productUid, offset, size);
         if (existingReviews == null || existingReviews.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();  // 리뷰가 없으면 404
         }
@@ -170,7 +197,7 @@ public class ReviewController {
         }
 
         // 리뷰 삭제
-        reviewMapper.deleteReview(uid);
+        reviewMapper.deleteReview(productUid);
         return ResponseEntity.status(HttpStatus.OK).build();  // 성공 시 200 반환
     }
 

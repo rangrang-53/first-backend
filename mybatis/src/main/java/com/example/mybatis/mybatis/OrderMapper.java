@@ -12,4 +12,5 @@ public interface OrderMapper {
     void createOrderDetail(OrderDetailDTO orderDetailDTO);
     List<OrderDTO> getOrderByUserUid(int userUid);
     void updateOrderStatus(OrderDTO orderDTO);
+    OrderDTO getOrderByUid(int orderUid);
 }

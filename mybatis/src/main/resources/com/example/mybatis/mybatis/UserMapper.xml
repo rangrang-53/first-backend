@@ -11,15 +11,15 @@
         <result column="nickname" property="nickname"></result>
         <result column="auth" property="auth"></result>
         <result column="signup_date" property="signupDate"></result>
-        <result column="account_status" property="account_status"></result>
+        <result column="account_status" property="accountStatus"></result>
     </resultMap>
 
-    <select id="findUser">
+    <select id="findUser" resultMap="userMap">
         SELECT *
         FROM user_tb
         WHERE id=#{id};
     </select>
-    <insert id="saveUser">
+    <insert id="saveUser" parameterType="com.example.mybatis.dto.UserDTO">
         INSERT INTO user_tb(id,password,nickname)
         VALUES(#{id},#{password},#{nickname});
     </insert>
