@@ -68,10 +68,11 @@ public class ReviewController {
     public ResponseEntity<Map<String, Object>> getReviewsByProduct(
             @PathVariable("productUid") int productUid,
             @RequestParam(value = "page", defaultValue = "1") int page,
-            @RequestParam(value = "size", defaultValue = "10") int size) {
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize) {
 
-        int offset = (page - 1) * size;  // offset 계산
-        List<ReviewDTO> reviews = reviewMapper.getReviewsByProduct(productUid, offset, size);
+        page = Math.max(1,page);
+        int offset = (page - 1) * pageSize;  // offset 계산
+        List<ReviewDTO> reviews = reviewMapper.getReviewsByProduct(productUid, offset, pageSize);
         if (reviews == null || reviews.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
@@ -84,7 +85,7 @@ public class ReviewController {
         response.put("reviews", reviews);
         response.put("total", totalReviews);
         response.put("currentPage", page);
-        response.put("totalPages", (int) Math.ceil((double) totalReviews / size));
+        response.put("totalPages", (int) Math.ceil((double) totalReviews / pageSize));
 
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
@@ -109,10 +110,10 @@ public class ReviewController {
         System.out.println("✅ 로그인한 사용자 userUid: " + userUid);
 
         int page = 1;  // 기본값
-        int size = 10;  // 기본값
-        int offset = (page - 1) * size;
+        int pageSize = 10;  // 기본값
+        int offset = (page - 1) * pageSize;
 
-        List<ReviewDTO> existingReviews = reviewMapper.getReviewsByProduct(productUid, offset, size);
+        List<ReviewDTO> existingReviews = reviewMapper.getReviewsByProduct(productUid, offset, pageSize);
         if (existingReviews == null || existingReviews.isEmpty()) {
             System.out.println("해당 리뷰가 존재하지 않음 (productUid: \" + reviewDTO.getProductDTO().getUid() + \", reviewUid: \" + reviewDTO.getUid() + \")");
             return new ResponseEntity<>(HttpStatus.NOT_FOUND); // 리뷰가 없으면 404
@@ -179,11 +180,11 @@ public class ReviewController {
 
         // 페이징을 위한 기본값 설정
         int page = 1;  // 기본값
-        int size = 10;  // 기본값
-        int offset = (page - 1) * size;
+        int pageSize = 10;  // 기본값
+        int offset = (page - 1) * pageSize;
 
         // 해당 리뷰를 가져옴 (productUid와 uid를 함께 사용하여 리뷰를 확인)
-        List<ReviewDTO> existingReviews = reviewMapper.getReviewsByProduct(productUid, offset, size);
+        List<ReviewDTO> existingReviews = reviewMapper.getReviewsByProduct(productUid, offset, pageSize);
         if (existingReviews == null || existingReviews.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();  // 리뷰가 없으면 404
         }

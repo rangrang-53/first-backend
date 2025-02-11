@@ -34,9 +34,39 @@
         JOIN user_tb ON qna_tb.user_uid = user_tb.uid
         JOIN product_tb ON qna_tb.product_uid = product_tb.uid
         WHERE qna_tb.product_uid = #{productUid}
-        AND qna_tb.uid =#{uid}
-        AND deleteyn = 'n';
+        AND deleteyn = 'n'
+        ORDER BY qna_tb.write_date DESC
+        LIMIT #{offset}, #{pageSize}
     </select>
+
+    <select id="getQnaCountByProduct" resultType="int">
+        SELECT COUNT(*)
+        FROM qna_tb
+        WHERE product_uid = #{productUid}
+        AND deleteyn = 'n'
+    </select>
+
+    <!-- ✅ 특정 QnA 조회 (비밀번호 포함) -->
+    <select id="findQnaByUid" resultMap="qnaMap">
+        SELECT qna_tb.uid, qna_tb.title, qna_tb.content, qna_tb.password, qna_tb.write_date,
+        qna_tb.category, user_tb.nickname, user_uid, product_uid, product_tb.name
+        FROM qna_tb
+        JOIN user_tb ON qna_tb.user_uid = user_tb.uid
+        JOIN product_tb ON qna_tb.product_uid = product_tb.uid
+        WHERE qna_tb.uid = #{uid}
+        AND deleteyn = 'n'
+    </select>
+
+
+    <select id="verifyQnaPassword" resultType="String">
+        SELECT COUNT(*)
+        FROM qna_tb
+        WHERE uid = #{uid}
+        AND password = #{password}
+        AND deleteyn = 'n'
+    </select>
+
+
 
     <insert id="saveQna">
         INSERT INTO qna_tb(title, content, category, password, user_uid, product_uid)

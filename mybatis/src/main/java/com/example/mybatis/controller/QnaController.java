@@ -11,9 +11,13 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
+@RequestMapping
 public class QnaController {
 
     private QnaMapper qnaMapper;
@@ -70,54 +74,84 @@ public class QnaController {
 
     }
 
-    @GetMapping("/qna/{productUid}/{uid}")
-    public ResponseEntity<?> getQnaByProduct(
+    @CrossOrigin(origins = "http://localhost:3000")
+    @GetMapping("/qna/{productUid}")
+    public ResponseEntity<Map<String, Object>> getQnaByProduct(
             @PathVariable("productUid") int productUid,
-            @PathVariable("uid") int uid,
-            @RequestParam(value = "password", required = false) String password,
+            @RequestParam(value = "page", defaultValue = "1") int page, // 페이지 번호
+            @RequestParam(value = "pageSize", defaultValue = "10") int pageSize, // 페이지 크기
+
             HttpServletRequest request) {
 
         HttpSession session = request.getSession(false);
         String userAuth = (session != null) ? (String) session.getAttribute("auth") :null;
 
-        List<QnaDTO> qnaList = qnaMapper.getqnaByProduct(productUid, uid);
+        page = Math.max(1,page);
+        int offset = (page - 1) * pageSize;
+        List<QnaDTO> qnaList = qnaMapper.getqnaByProduct(productUid, offset, pageSize);
 
         if (qnaList == null || qnaList.isEmpty()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+        int totalQnas = qnaMapper.getQnaCountByProduct(productUid);
 
-        QnaDTO qna = qnaList.get(0);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("uid", productUid);
+        response.put("total", totalQnas);
+        response.put("currentPage", page);
+        response.put("totalPages", (int) Math.ceil((double) totalQnas / pageSize));
 
         // ✅ 관리자(role_admin)는 비밀번호 없이 접근 가능
         if ("role_admin".equals(userAuth)) {
-            System.out.println("✅ 관리자 접근: 비밀번호 검사 생략");
+            response.put("qnas", qnaList);
+            return ResponseEntity.ok(response);
+        }
+
+        List<QnaDTO> filteredQnaList =new ArrayList<>();
+
+
+        for (QnaDTO qna : qnaList) {
+            if (qna.getPassword() == null) {
+                // 🔓 비밀번호 없는 QnA는 바로 추가
+                filteredQnaList.add(qna);
+            } else {
+                QnaDTO protectedQna = new QnaDTO();
+                protectedQna.setUid(qna.getUid());
+                protectedQna.setTitle("🔒 비공개 질문입니다.");
+                protectedQna.setContent("이 질문의 상세 내용을 보려면 비밀번호를 입력하세요.");
+                filteredQnaList.add(protectedQna);
+            }
+        }
+        response.put("qnas", filteredQnaList);
+        return ResponseEntity.ok(response);
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000")
+    @PostMapping("/qna/{qnaUid}/verify")
+    public ResponseEntity<?> verifyQnaPassword(
+            @PathVariable("qnaUid") int qnaUid,
+            @RequestBody Map<String, String> request) {
+
+        String inputPassword = request.get("password");
+        QnaDTO qna = qnaMapper.findQnaByUid(qnaUid);
+
+        if (qna == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("QnA가 존재하지 않습니다.");
+        }
+
+        // 비밀번호가 없는 Q&A는 비밀번호 검증 없이 바로 공개
+        if (qna.getPassword() == null) {
             return ResponseEntity.ok(qna);
         }
 
-        // ✅ 디버깅용 출력
-        System.out.println("🔍 DB에서 가져온 QnA 비밀번호: " + qna.getPassword());
-        System.out.println("🔍 사용자가 입력한 비밀번호 (쿼리 파라미터): " + password);
-
-        // ✅ 비밀번호가 설정된 QnA인지 확인
-        if (qna.getPassword() != null) {
-            try {
-                Integer inputPassword = Integer.parseInt(password); // 🔥 String → Integer 변환
-                System.out.println("🔍 변환된 비밀번호(Integer): " + inputPassword);
-
-                if (!inputPassword.equals(qna.getPassword())) {
-                    System.out.println("❌ 비밀번호가 일치하지 않습니다.");
-                    return ResponseEntity.status(HttpStatus.FORBIDDEN).body("비밀번호가 일치하지 않습니다.");
-                }
-            } catch (NumberFormatException e) {
-                System.out.println("❌ 올바르지 않은 비밀번호 형식입니다.");
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("비밀번호는 숫자로 입력해야 합니다.");
-            }
+        // 비밀번호 비교 (문자열 비교; 해시를 사용한다면 해시값 비교)
+        if (qna.getPassword().equals(inputPassword)) {
+            return ResponseEntity.ok(qna);
+        } else {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("비밀번호가 일치하지 않습니다.");
         }
-
-
-
-        // ✅ 비밀번호가 맞거나 비밀번호가 없는 경우, QnA 데이터 반환
-        return ResponseEntity.ok(qna);
     }
+
 }
 

@@ -33,6 +33,7 @@
         JOIN product_tb ON review_tb.product_uid = product_tb.uid
         WHERE review_tb.product_uid = #{productUid}
         AND deleteyn = 'n'
+        ORDER BY review_tb.write_date DESC
         LIMIT #{offset}, #{pageSize};
     </select>
 
