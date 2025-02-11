@@ -11,10 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping
@@ -74,7 +71,7 @@ public class QnaController {
 
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
     @GetMapping("/qna/{productUid}")
     public ResponseEntity<Map<String, Object>> getQnaByProduct(
             @PathVariable("productUid") int productUid,
@@ -85,6 +82,9 @@ public class QnaController {
 
         HttpSession session = request.getSession(false);
         String userAuth = (session != null) ? (String) session.getAttribute("auth") :null;
+        Set<Integer> verifiedQnaIds = (session != null) ?
+                (Set<Integer>) session.getAttribute("verifiedQnaIds") :
+                new HashSet<>();
 
         page = Math.max(1,page);
         int offset = (page - 1) * pageSize;
@@ -108,18 +108,22 @@ public class QnaController {
             return ResponseEntity.ok(response);
         }
 
+
         List<QnaDTO> filteredQnaList =new ArrayList<>();
 
 
         for (QnaDTO qna : qnaList) {
-            if (qna.getPassword() == null) {
+            if (qna.getPassword() == null || verifiedQnaIds.contains(qna.getUid())) {
                 // 🔓 비밀번호 없는 QnA는 바로 추가
                 filteredQnaList.add(qna);
             } else {
                 QnaDTO protectedQna = new QnaDTO();
                 protectedQna.setUid(qna.getUid());
+                protectedQna.setCategory(qna.getCategory());
                 protectedQna.setTitle("🔒 비공개 질문입니다.");
                 protectedQna.setContent("이 질문의 상세 내용을 보려면 비밀번호를 입력하세요.");
+                protectedQna.setUserDTO(qna.getUserDTO());
+                protectedQna.setWriteDate(qna.getWriteDate());
                 filteredQnaList.add(protectedQna);
             }
         }
@@ -127,11 +131,12 @@ public class QnaController {
         return ResponseEntity.ok(response);
     }
 
-    @CrossOrigin(origins = "http://localhost:3000")
+    @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
     @PostMapping("/qna/{qnaUid}/verify")
     public ResponseEntity<?> verifyQnaPassword(
             @PathVariable("qnaUid") int qnaUid,
-            @RequestBody Map<String, String> request) {
+            @RequestBody Map<String, String> request,
+            HttpServletRequest httpServletRequest) {
 
         String inputPassword = request.get("password");
         QnaDTO qna = qnaMapper.findQnaByUid(qnaUid);
@@ -141,16 +146,26 @@ public class QnaController {
         }
 
         // 비밀번호가 없는 Q&A는 비밀번호 검증 없이 바로 공개
-        if (qna.getPassword() == null) {
+        if (qna.getPassword() == null || qna.getPassword().isEmpty()) {
             return ResponseEntity.ok(qna);
         }
 
-        // 비밀번호 비교 (문자열 비교; 해시를 사용한다면 해시값 비교)
-        if (qna.getPassword().equals(inputPassword)) {
-            return ResponseEntity.ok(qna);
-        } else {
+        if (!Objects.equals(qna.getPassword(), inputPassword)) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body("비밀번호가 일치하지 않습니다.");
         }
+
+        // 세션에서 기존의 인증된 질문 리스트를 저장하는 로직 추가
+        HttpSession session = httpServletRequest.getSession(true);
+        Set<Integer> verifiedQnaIds = (Set<Integer>) session.getAttribute("verifiedQnaIds");
+
+        if (verifiedQnaIds == null) {
+            verifiedQnaIds = new HashSet<>();
+        }
+        verifiedQnaIds.add(qnaUid);
+        session.setAttribute("verifiedQnaIds", verifiedQnaIds);
+        System.out.println("🔓 비밀번호 인증 완료! 원래 내용 반환: " + qna.getContent());
+
+        return ResponseEntity.ok(qna);
     }
 
 }

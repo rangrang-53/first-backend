@@ -19,7 +19,7 @@
 
         <association property="userDTO" javaType="com.example.mybatis.dto.UserDTO">
             <id column="user_uid" property="uid"></id>
-            <result column="nickname" property="nickname"></result>
+            <result column="id" property="id"></result>
         </association>
 
         <association property="productDTO" javaType="com.example.mybatis.dto.ProductDTO">
@@ -29,7 +29,7 @@
     </resultMap>
 
     <select id="getqnaByProduct" resultMap="qnaMap">
-        SELECT qna_tb.uid, qna_tb.title, qna_tb.content, qna_tb.password, qna_tb.write_date, qna_tb.category, user_tb.nickname, user_uid, product_uid, product_tb.name
+        SELECT qna_tb.uid, qna_tb.title, qna_tb.content, qna_tb.password, qna_tb.write_date, qna_tb.category, user_tb.id, user_uid, product_uid, product_tb.name
         FROM qna_tb
         JOIN user_tb ON qna_tb.user_uid = user_tb.uid
         JOIN product_tb ON qna_tb.product_uid = product_tb.uid
@@ -49,7 +49,7 @@
     <!-- ✅ 특정 QnA 조회 (비밀번호 포함) -->
     <select id="findQnaByUid" resultMap="qnaMap">
         SELECT qna_tb.uid, qna_tb.title, qna_tb.content, qna_tb.password, qna_tb.write_date,
-        qna_tb.category, user_tb.nickname, user_uid, product_uid, product_tb.name
+        qna_tb.category, user_tb.id, user_uid, product_uid, product_tb.name
         FROM qna_tb
         JOIN user_tb ON qna_tb.user_uid = user_tb.uid
         JOIN product_tb ON qna_tb.product_uid = product_tb.uid
