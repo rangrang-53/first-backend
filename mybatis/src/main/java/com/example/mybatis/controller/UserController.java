@@ -33,37 +33,26 @@ public class UserController {
                                    HttpServletRequest request,
                                    HttpServletResponse response){
         try {
-            UserDTO user = userMapper.findUser(userDTO.getId());
+            // id와 password를 findUserByIdAndPassword로 전달
+            UserDTO user = userMapper.findUserByIdAndPassword(userDTO.getId(), userDTO.getPassword());
 
-            if(user == null || !userDTO.getPassword().equals(user.getPassword())){
-                Cookie cookie = new Cookie("JSESSIONID", null);
-                cookie.setPath("/");
-                cookie.setMaxAge(0);
-                response.addCookie(cookie);
-
-
-                return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED); // 좀 더 구체적인 메시지 제공
+            if(user == null){
+                // 인증 실패 처리
+                return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
             }
 
+            // 인증 성공 처리
             HttpSession session = request.getSession(true);
             session.setAttribute("userUid", user.getUid());
             session.setAttribute("auth", user.getAuth());
 
-            Cookie cookie = new Cookie("JSESSIONID", session.getId());
-            cookie.setHttpOnly(true);
-            cookie.setSecure(false);  // HTTPS에서만 쿠키 전송 (필요 시 활성화)
-            cookie.setMaxAge(30 * 60); // 세션 타임아웃 (30분)
-            cookie.setPath("/");
-
-            response.addCookie(cookie);
-            response.setHeader("Set-Cookie", "JSESSIONID=" + session.getId() + "; Path=/; HttpOnly; Secure; SameSite=None; Max-Age=" + (30 * 60));
-
             return new ResponseEntity<>(HttpStatus.OK);
         } catch (Exception e) {
-            e.printStackTrace(); // 예외 로그 출력
-            return new ResponseEntity<>("An error occurred", HttpStatus.INTERNAL_SERVER_ERROR); // 500 상태 반환
+            e.printStackTrace();
+            return new ResponseEntity<>("An error occurred", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+
 
 
     @PostMapping("/logout")
@@ -79,4 +68,34 @@ public class UserController {
         }
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @GetMapping("/check-login")
+    @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+    public ResponseEntity<?> checkLoginStatus(HttpServletRequest request) {
+        System.out.println("Request URL: " + request.getRequestURL()); // 로그로 요청 URL 확인
+        HttpSession session = request.getSession(false);
+        if (session != null && session.getAttribute("userUid") != null) {
+            return new ResponseEntity<>(new LoginStatus(true), HttpStatus.OK);
+        }
+        return new ResponseEntity<>(new LoginStatus(false), HttpStatus.OK);
+    }
+
+
+    public static class LoginStatus {
+        private boolean loggedIn;
+
+        public LoginStatus(boolean loggedIn) {
+            this.loggedIn = loggedIn;
+        }
+
+        public boolean isLoggedIn() {
+            return loggedIn;
+        }
+
+        public void setLoggedIn(boolean loggedIn) {
+            this.loggedIn = loggedIn;
+        }
+    }
+
+
 }

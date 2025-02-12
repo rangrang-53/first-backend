@@ -19,6 +19,12 @@
         FROM user_tb
         WHERE id=#{id};
     </select>
+
+    <select id="findUserByIdAndPassword" resultMap="userMap">
+        SELECT *
+        FROM user_tb
+        WHERE id=#{id} AND password=#{password};
+    </select>
     <insert id="saveUser" parameterType="com.example.mybatis.dto.UserDTO">
         INSERT INTO user_tb(id,password,nickname)
         VALUES(#{id},#{password},#{nickname});

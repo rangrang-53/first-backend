@@ -17,6 +17,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping
+
 public class ReviewController {
     private ReviewMapper reviewMapper;
 
@@ -93,7 +94,7 @@ public class ReviewController {
     @PatchMapping("/review/{productUid}")
     public ResponseEntity<?> editReview(@PathVariable("productUid") int productUid,
                                           @RequestBody ReviewDTO reviewDTO, HttpServletRequest request) {
-        HttpSession session = request.getSession(false);
+        try{HttpSession session = request.getSession(false);
 
         // 세션 확인
         if (session == null) {
@@ -162,6 +163,10 @@ public class ReviewController {
 
 
         return new ResponseEntity<>(HttpStatus.OK); // 수정 성공 시 200 반환
+    } catch (Exception e) {
+            e.printStackTrace();
+            return new ResponseEntity<>("서버 오류", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @DeleteMapping("/review/{productUid}")
