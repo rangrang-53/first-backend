@@ -7,7 +7,7 @@
     <resultMap id="reviewMap" type="com.example.mybatis.dto.ReviewDTO">
         <id column="uid" property="uid"></id>
         <result column="title" property="title"></result>
-        <result column="content" property="content"></result>
+        <result column="content" property="content" jdbcType="VARCHAR"></result>
         <result column="write_date" property="writeDate"></result>
         <result column="modify_date" property="modifyDate"></result>
         <result column="view_count" property="viewCount"></result>
@@ -35,6 +35,15 @@
         AND deleteyn = 'n'
         ORDER BY review_tb.write_date DESC
         LIMIT #{offset}, #{pageSize};
+    </select>
+
+    <select id="getReviewByUid" resultMap="reviewMap">
+        SELECT review_tb.uid, review_tb.title, review_tb.content, review_tb.rating, review_tb.write_date, review_tb.view_count, review_tb.image, user_tb.id, user_uid, product_uid, product_tb.name
+        FROM review_tb
+        JOIN user_tb ON review_tb.user_uid = user_tb.uid
+        JOIN product_tb ON review_tb.product_uid = product_tb.uid
+        WHERE review_tb.uid = #{uid}
+        AND deleteyn = 'n';
     </select>
 
     <select id="getReviewCountByProduct" resultType="int">

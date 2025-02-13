@@ -44,6 +44,7 @@ public class UserController {
             // 인증 성공 처리
             HttpSession session = request.getSession(true);
             session.setAttribute("userUid", user.getUid());
+            session.setAttribute("userId", user.getId());
             session.setAttribute("auth", user.getAuth());
 
             return new ResponseEntity<>(HttpStatus.OK);
@@ -80,6 +81,21 @@ public class UserController {
         return new ResponseEntity<>(new LoginStatus(false), HttpStatus.OK);
     }
 
+
+    @GetMapping("/user-info")
+    @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+    public ResponseEntity<?> getUserInfo(HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null || session.getAttribute("userUid") == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        Integer userUid = (Integer) session.getAttribute("userUid");
+        UserDTO user = userMapper.findUserByUid(userUid);
+        if (user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        return new ResponseEntity<>(user, HttpStatus.OK);
+    }
 
     public static class LoginStatus {
         private boolean loggedIn;

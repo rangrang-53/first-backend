@@ -168,5 +168,90 @@ public class QnaController {
         return ResponseEntity.ok(qna);
     }
 
+    @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+    @DeleteMapping("/qna/{uid}")
+    public ResponseEntity<?> deleteQna(@PathVariable("uid") int uid, HttpServletRequest request) {
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Integer userUid = (Integer) session.getAttribute("userUid");
+        if (userUid == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        // QnA 존재 여부 확인
+        QnaDTO qna = qnaMapper.findQnaByUid(uid);
+        if (qna == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("삭제할 QnA가 존재하지 않습니다.");
+        }
+
+        // 관리자이거나 작성자인 경우 삭제 가능
+        String userAuth = (String) session.getAttribute("auth");
+        if (!"role_admin".equals(userAuth) && !Objects.equals(qna.getUserDTO().getUid(), userUid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("삭제 권한이 없습니다.");
+        }
+
+        // 실제 삭제 처리 (DB에서 삭제 플래그 업데이트)
+        qnaMapper.deleteQna(uid);
+        return ResponseEntity.ok().body("QnA가 삭제되었습니다.");
+    }
+
+    @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
+    @PatchMapping("/qna/{productUid}/{uid}")
+    public ResponseEntity<?> updateQna(
+            @PathVariable("uid") int uid,
+            @PathVariable("productUid") int productUid,
+            @RequestBody QnaDTO updatedQnaDTO,
+            HttpServletRequest request) {
+
+        // 세션에서 로그인 사용자 정보 확인
+        HttpSession session = request.getSession(false);
+        if (session == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
+        Integer userUid = (Integer) session.getAttribute("userUid");
+        if (userUid == null) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 로그인되지 않은 사용자
+        }
+
+        // QnA 존재 여부 확인
+        QnaDTO existingQna  = qnaMapper.findQnaByUid(uid);
+        if (existingQna  == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("QnA가 존재하지 않습니다.");
+        }
+
+        // 권한 확인: QnA 작성자이거나 관리자일 때 수정 가능
+        String userAuth = (String) session.getAttribute("auth");
+        if (!"role_admin".equals(userAuth) && !Objects.equals(existingQna .getUserDTO().getUid(), userUid)) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("수정 권한이 없습니다.");
+        }
+
+        if (updatedQnaDTO.getTitle() == null || updatedQnaDTO.getContent() == null || updatedQnaDTO.getTitle().trim().isEmpty() ||
+        updatedQnaDTO.getContent().trim().isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("수정할 데이터가 부족합니다.");
+        }
+
+        if (updatedQnaDTO.getCategory() == null || updatedQnaDTO.getCategory().trim().isEmpty()){
+            updatedQnaDTO.setCategory(existingQna .getCategory());
+        }
+
+        updatedQnaDTO.setUid(uid);
+
+        try {
+            qnaMapper.updateQna(updatedQnaDTO);
+            return ResponseEntity.ok("QnA가 성공적으로 수정되었습니다.");  // DB에서 QnA 수정
+        } catch (Exception e){
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("서버 오류 발생");
+        }
+
+
+    }
+
+
+
 }
 

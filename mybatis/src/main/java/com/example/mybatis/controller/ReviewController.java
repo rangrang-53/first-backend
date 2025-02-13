@@ -37,12 +37,14 @@ public class ReviewController {
         }
 
         Integer userUid = (Integer) session.getAttribute("userUid");
-        if (userUid == null) {
-            System.out.println("❌ userUid가 세션에 존재하지 않습니다.");
+        String userId = (String) session.getAttribute("userId");
+        if (userUid == null || userId == null) {
+            System.out.println("❌ 사용자 정보가 세션에 존재하지 않습니다.");
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED); // 세션에 userUid가 없으면 401 응답
         }
 
         System.out.println("✅ 로그인한 사용자 userUid: " + userUid);
+        System.out.println("✅ 로그인한 사용자 userId: " + userId);
 
 
         if (reviewDTO.getTitle() == null || reviewDTO.getContent() == null
@@ -51,12 +53,11 @@ public class ReviewController {
         }
         UserDTO userDTO = new UserDTO();
         userDTO.setUid(userUid);
+        userDTO.setId(userId);
         reviewDTO.setUserDTO(userDTO);
 
         System.out.println("작성된 리뷰의 userDTO uid: " + reviewDTO.getUserDTO().getUid());
-
-        System.out.println("Saving Review: " + reviewDTO.getUserDTO().getUid());
-        System.out.println("Product ID: " + reviewDTO.getProductDTO().getUid());
+        System.out.println("작성된 리뷰의 userDTO id: " + reviewDTO.getUserDTO().getId());
 
 
         reviewMapper.saveReview(reviewDTO);
@@ -91,8 +92,9 @@ public class ReviewController {
         return new ResponseEntity<>(response, HttpStatus.OK);
     }
 
-    @PatchMapping("/review/{productUid}")
+    @PatchMapping("/review/{productUid}/{uid}")
     public ResponseEntity<?> editReview(@PathVariable("productUid") int productUid,
+                                          @PathVariable("uid") int uid,
                                           @RequestBody ReviewDTO reviewDTO, HttpServletRequest request) {
         try{HttpSession session = request.getSession(false);
 
@@ -169,12 +171,13 @@ public class ReviewController {
         }
     }
 
-    @DeleteMapping("/review/{productUid}")
+    @DeleteMapping("/review/{productUid}/{uid}")
     public ResponseEntity<?> removeReview(@PathVariable("productUid") int productUid,
-                                          HttpServletRequest request){
+                                          @PathVariable("uid") int uid,
+                                          HttpServletRequest request) {
         HttpSession session = request.getSession(false);
 
-        if(session == null){
+        if (session == null) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
@@ -183,28 +186,21 @@ public class ReviewController {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
-        // 페이징을 위한 기본값 설정
-        int page = 1;  // 기본값
-        int pageSize = 10;  // 기본값
-        int offset = (page - 1) * pageSize;
-
-        // 해당 리뷰를 가져옴 (productUid와 uid를 함께 사용하여 리뷰를 확인)
-        List<ReviewDTO> existingReviews = reviewMapper.getReviewsByProduct(productUid, offset, pageSize);
-        if (existingReviews == null || existingReviews.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();  // 리뷰가 없으면 404
+        ReviewDTO review = reviewMapper.getReviewByUid(uid);
+        if (review == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
-        // List에서 첫 번째 리뷰 가져오기
-        ReviewDTO review = existingReviews.get(0);
+        if (review.getProductDTO() == null || review.getProductDTO().getUid() != productUid) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
 
-        // 리뷰 작성자 확인 (로그인된 사용자와 리뷰 작성자 비교)
         if (review.getUserDTO().getUid() != userUid) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();  // 리뷰 작성자와 다르면 403
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
         }
 
-        // 리뷰 삭제
-        reviewMapper.deleteReview(productUid);
-        return ResponseEntity.status(HttpStatus.OK).build();  // 성공 시 200 반환
+        reviewMapper.deleteReview(uid);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 

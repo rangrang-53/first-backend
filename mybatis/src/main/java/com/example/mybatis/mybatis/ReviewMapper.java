@@ -13,6 +13,7 @@ public interface ReviewMapper {
                                         @Param("offset") int offset,
                                         @Param("pageSize") int pageSize);
     int getReviewCountByProduct(@Param("productUid") int productUid);
+    ReviewDTO getReviewByUid(@Param("uid") int uid);
     void updateReview(ReviewDTO reviewDTO);
     void deleteReview(int uid);
 }

@@ -11,4 +11,5 @@ public interface UserMapper {
     void saveUser(UserDTO userDTO);
     UserDTO findUser(String id);
     UserDTO findUserByIdAndPassword(@Param("id") String id, @Param("password") String password);
+    UserDTO findUserByUid(@Param("uid") int uid);
 }

@@ -16,4 +16,6 @@ public interface QnaMapper {
     int getQnaCountByProduct(@Param("productUid") int productUid);
     QnaDTO findQnaByUid(@Param("uid") int uid);
     int verifyQnaPassword(@Param("uid") int uid, @Param("password") String password);
+    void deleteQna(@Param("uid") int uid);
+    void updateQna (QnaDTO qnaDTO);
 }

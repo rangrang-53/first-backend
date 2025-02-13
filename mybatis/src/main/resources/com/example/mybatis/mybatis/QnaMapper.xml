@@ -67,6 +67,32 @@
     </select>
 
 
+    <update id="deleteQna">
+        UPDATE qna_tb
+        SET deleteyn = 'y'
+        WHERE uid = #{uid};
+    </update>
+
+    <update id="updateQna">
+        UPDATE qna_tb
+        SET
+        title = #{title},
+        content = #{content},
+        category = COALESCE(NULLIF(#{category}, ''), (SELECT category FROM qna_tb WHERE uid = #{uid})),
+        password = CASE
+        WHEN #{password} IS NULL THEN (SELECT password FROM qna_tb WHERE uid = #{uid})
+        WHEN #{password} = '' THEN NULL
+        ELSE #{password}
+        END,
+        modify_date = NOW()
+        WHERE uid = #{uid} AND deleteyn = 'n';
+    </update>
+
+
+
+
+
+
 
     <insert id="saveQna">
         INSERT INTO qna_tb(title, content, category, password, user_uid, product_uid)
